@@ -1,0 +1,9 @@
+Name,Ticker,Quantity,Value,Currency
+Apple Inc,AAPL,10,1900,CHF
+Microsoft Corp,MSFT,8,3200,CHF
+NVIDIA Corp,NVDA,6,4200,CHF
+iShares Core MSCI World UCITS ETF,IWDA,25,2100,CHF
+Vanguard S&P 500 UCITS ETF,VUSA,30,2800,CHF
+Tesla Inc,TSLA,5,900,CHF
+Cash CHF,CASH,1,1200,CHF
+Put Option Nasdaq 100,NDAQ-PUT,2,400,CHF

@@ -1,0 +1,21 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t portfolio-analyzer:${{ github.sha }} ./app
+
+      - name: CLI smoke test
+        run: |
+          cd app
+          pip install -r requirements.txt
+          python cli.py ../samples/sample_depot.csv
