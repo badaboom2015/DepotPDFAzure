@@ -1,0 +1,68 @@
+{
+  "id": "/subscriptions/7b79ae9c-2a18-434f-9cbc-8cf3c8e57d75/resourceGroups/rg-css-portfolio-dev/providers/Microsoft.App/containerApps/ca-css-portfolio-dev/revisions/ca-css-portfolio-dev--0000007",
+  "name": "ca-css-portfolio-dev--0000007",
+  "properties": {
+    "active": true,
+    "createdTime": "2026-06-25T00:17:55+00:00",
+    "fqdn": "ca-css-portfolio-dev--0000007.yellowflower-23240e22.switzerlandnorth.azurecontainerapps.io",
+    "healthState": "Unhealthy",
+    "provisioningState": "Provisioned",
+    "replicas": 1,
+    "runningState": "ActivationFailed",
+    "runningStateDetails": "Deployment Progress Deadline Exceeded. 0/1 replicas ready.",
+    "template": {
+      "containers": [
+        {
+          "env": [
+            {
+              "name": "AZURE_STORAGE_ACCOUNT_URL",
+              "value": "https://stcssportfoliodevnttm3.blob.core.windows.net"
+            },
+            {
+              "name": "AZURE_STORAGE_CONTAINER",
+              "value": "uploads"
+            },
+            {
+              "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+              "value": "InstrumentationKey=8ae6d84e-903c-476c-8624-e905ffea357e;IngestionEndpoint=https://switzerlandnorth-0.in.applicationinsights.azure.com/;LiveEndpoint=https://switzerlandnorth.livediagnostics.monitor.azure.com/;ApplicationId=8266644f-8d5f-4cf2-ae8e-970aa7f50ba0"
+            },
+            {
+              "name": "SERVICE_BUS_NAMESPACE",
+              "value": "sb-css-portfolio-dev-nttm3u"
+            },
+            {
+              "name": "POSTGRES_HOST",
+              "value": "psql-css-portfolio-dev-nttm3u.postgres.database.azure.com"
+            },
+            {
+              "name": "POSTGRES_DATABASE",
+              "value": "portfolio"
+            }
+          ],
+          "image": "acrcssportfoliodevnttm3u.azurecr.io/portfolio-analyzer:v7",
+          "name": "portfolio-analyzer",
+          "probes": [],
+          "resources": {
+            "cpu": 0.5,
+            "memory": "1Gi"
+          }
+        }
+      ],
+      "initContainers": null,
+      "revisionSuffix": null,
+      "scale": {
+        "cooldownPeriod": null,
+        "maxReplicas": 3,
+        "minReplicas": 1,
+        "pollingInterval": null,
+        "rules": null
+      },
+      "serviceBinds": null,
+      "terminationGracePeriodSeconds": null,
+      "volumes": []
+    },
+    "trafficWeight": 100
+  },
+  "resourceGroup": "rg-css-portfolio-dev",
+  "type": "Microsoft.App/containerapps/revisions"
+}

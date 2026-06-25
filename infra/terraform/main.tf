@@ -38,7 +38,7 @@ resource "azurerm_subnet" "container_apps" {
   name                 = "snet-containerapps"
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = ["10.40.1.0/23"]
+  address_prefixes     = ["10.40.0.0/23"]
 
   delegation {
     name = "containerapps-delegation"
@@ -148,7 +148,7 @@ resource "azurerm_storage_account" "main" {
   account_replication_type        = "LRS"
   min_tls_version                 = "TLS1_2"
   allow_nested_items_to_be_public = false
-  public_network_access_enabled   = false
+  public_network_access_enabled   = true
   tags                            = local.tags
 
   blob_properties {
@@ -238,7 +238,8 @@ resource "azurerm_postgresql_flexible_server" "main" {
   zone                   = "1"
   tags                   = local.tags
 
-  depends_on = [azurerm_private_dns_zone_virtual_network_link.postgres]
+  public_network_access_enabled = false
+  depends_on                    = [azurerm_private_dns_zone_virtual_network_link.postgres]
 }
 
 resource "azurerm_postgresql_flexible_server_database" "main" {
@@ -260,9 +261,9 @@ resource "azurerm_servicebus_queue" "imports" {
   name         = "portfolio-imports"
   namespace_id = azurerm_servicebus_namespace.main.id
 
-  lock_duration                         = "PT1M"
-  max_delivery_count                    = 5
-  dead_lettering_on_message_expiration  = true
+  lock_duration                        = "PT1M"
+  max_delivery_count                   = 5
+  dead_lettering_on_message_expiration = true
 }
 
 resource "azurerm_container_app_environment" "main" {
@@ -272,6 +273,12 @@ resource "azurerm_container_app_environment" "main" {
   log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
   infrastructure_subnet_id   = azurerm_subnet.container_apps.id
   tags                       = local.tags
+
+  lifecycle {
+    ignore_changes = [
+      infrastructure_resource_group_name
+    ]
+  }
 }
 
 resource "azurerm_user_assigned_identity" "app" {
@@ -327,7 +334,7 @@ resource "azurerm_container_app" "main" {
   }
 
   template {
-    min_replicas = 0
+    min_replicas = 1
     max_replicas = 3
 
     container {

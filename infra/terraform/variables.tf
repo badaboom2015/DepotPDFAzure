@@ -10,12 +10,12 @@ variable "environment" {
 
 variable "location" {
   type    = string
-  default = "westeurope"
+  default = "switzerlandnorth"
 }
 
 variable "container_image" {
   type    = string
-  default = "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest"
+  default = "acrcssportfoliodevnttm3u.azurecr.io/portfolio-analyzer:v3"
 }
 
 variable "postgres_admin" {
