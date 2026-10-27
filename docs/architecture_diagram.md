@@ -2,6 +2,80 @@
 
 Die Diagramme beschreiben den aktuellen Code und die bereitgestellte Infrastruktur. Eine Ressource in Azure bedeutet nicht automatisch, dass die Anwendung sie bereits verwendet.
 
+## Vollständiger Ablauf der Webanwendung
+
+Dieses Diagramm folgt der Aufrufreihenfolge in `app/app.py`. Es zeigt die fachliche Verarbeitung innerhalb einer Streamlit-Ausführung. Bei einer neuen Dateiauswahl startet Streamlit die Verarbeitung erneut.
+
+```mermaid
+flowchart TD
+    Start([Seite öffnen oder Streamlit erneut ausführen]) --> Page[Seitentitel und Datei-Upload anzeigen]
+    Page --> File{Datei ausgewählt?}
+    File -->|Nein| Wait[Hinweis auf CSV, PDF und Beispieldatei anzeigen]
+    Wait --> EndWait([Auf Eingabe warten])
+    File -->|Ja| Storage{Azure-Storage-Verbindung konfiguriert?}
+    Storage -->|Nein| Read[Datei für den Import bereitstellen]
+    Storage -->|Ja| Auth{Connection String vorhanden?}
+    Auth -->|Ja| Conn[Blob-Client mit Connection String erstellen]
+    Auth -->|Nein| Identity[DefaultAzureCredential mit zugewiesener Managed Identity]
+    Conn --> Save
+    Identity --> Save[Blob-Name aus UTC-Zeit und Dateiname bilden]
+    Save --> Container[Container-Erstellung versuchen, Fehler dabei abfangen]
+    Container --> Upload[Originaldatei hochladen und Leseposition zurücksetzen]
+    Upload -->|Erfolgreich: Blob-URI merken| Read
+    Upload -->|Fehler| Error[Processing failed mit Fehlertext anzeigen]
+    Read --> Type{Dateiendung CSV?}
+    Type -->|Ja| CSV[CSV mit mehreren Trennzeichen-Versuchen lesen]
+    Type -->|Nein: PDF aus der Dateiauswahl| PDF[PDF-Seiten mit pdfplumber öffnen und Tabellen extrahieren]
+    PDF --> Tables{Tabellenzeilen gefunden?}
+    Tables -->|Nein| Error
+    Tables -->|Ja| Normalize
+    CSV -->|Lesbar| Normalize[Spaltennamen vereinheitlichen und Pflichtspalten prüfen]
+    CSV -->|Nicht lesbar| Error
+    Normalize -->|Fehlende Spalten oder ungültige Zahlen| Error
+    Normalize -->|Erfolgreich| Numbers[Menge und Wert parsen, optionale Spalten ergänzen und fehlende Werte entfernen]
+    Numbers --> Total[Positionswerte zum Gesamtwert summieren]
+    Total --> Positive{Gesamtwert größer als null?}
+    Positive -->|Nein| Error
+    Positive -->|Ja| Weights[Gewichte berechnen und Anlageklasse sowie Tech- und USA-Bezug zuordnen]
+    Weights --> Sort[Nach Positionswert sortieren und Top 5 bestimmen]
+    Sort --> Risks[Konzentrationen anhand fester Schwellenwerte prüfen]
+    Risks --> Result[AnalysisResult mit Positionen und Kennzahlen erstellen]
+    Result --> Comment[Regelbasierte Textzusammenfassung erzeugen]
+    Comment --> Success[Importbestätigung und gegebenenfalls Blob-URI anzeigen]
+    Success --> Metrics[Gesamtwert, Positionszahl und größtes Gewicht anzeigen]
+    Metrics --> Positions[Alle Positionen und Top-5-Tabelle anzeigen]
+    Positions --> HasRisk{Konzentrationshinweise vorhanden?}
+    HasRisk -->|Ja| Warnings[Jeden Hinweis als Warnung anzeigen]
+    HasRisk -->|Nein| NoRisk[Hinweis auf keine erkannten Konzentrationen anzeigen]
+    Warnings --> Summary[Textzusammenfassung anzeigen]
+    NoRisk --> Summary
+    Summary --> Done([Ergebnis in der aktuellen Sitzung sichtbar])
+    Error --> Failed([Verarbeitung für diesen Durchlauf beendet])
+    classDef failure fill:#FDECEC,stroke:#B42318,color:#7A271A;
+    class Error,Failed failure;
+```
+
+**Gemeinsame Fehlerbehandlung:** Der äußere `try`/`except`-Block umfasst Storage, Import, Analyse, Textgenerierung und Ergebnisdarstellung. Eine Ausnahme in einem dieser Schritte führt zur Fehlermeldung. Das Diagramm zeigt typische Fehlerstellen ausdrücklich; der Handler gilt auch für nicht eingezeichnete Laufzeitfehler. Schlägt etwa die Tabellenanzeige fehl, können vorher bereits Kennzahlen sichtbar sein.
+
+**Dateizustand:** Die Speicherung passiert vor der Validierung. Ein danach fehlgeschlagener Import oder eine fehlerhafte Analyse löscht den gespeicherten Blob nicht automatisch. Der Dateiname verwendet UTC-Zeit mit Sekundengenauigkeit, und der Upload erlaubt das Überschreiben eines gleichnamigen Blobs. Die Namen sind deshalb nicht unter allen Umständen eindeutig.
+
+**Konzentrationsregeln:** Ab 25 % Gewicht erscheint eine Einzelpositions-Konzentration, zwischen 15 % und unter 25 % ein Hinweis auf eine große Position. Weitere Schwellen sind 70 % für die Top 5, 40 % für erkannte Technologiepositionen und 50 % für erkannte USA-Bezüge. Diese Zuordnungen beruhen auf Schlüsselwörtern, nicht auf externen Stammdaten.
+
+## Ablauf über die Kommandozeile
+
+```mermaid
+flowchart LR
+    CLI[CLI starten] --> Args{Genau ein Dateipfad angegeben?}
+    Args -->|Nein| Usage[Aufrufhinweis anzeigen und mit Exit-Code 1 beenden]
+    Args -->|Ja| Local[Lokale CSV oder PDF lesen]
+    Local --> Normalize[Normalisieren]
+    Normalize --> Analyze[Gemeinsamen Analyzer aufrufen]
+    Analyze --> Print[Positionen, Kennzahlen, Top 5 und Risiken ausgeben]
+    Print --> Comment[Regelbasierte Zusammenfassung ausgeben]
+```
+
+Die CLI verwendet Importer und Analyzer der Webanwendung. Sie hat keinen Blob-Upload und keine eigene grafische Fehlerbehandlung. Unbehandelte Import- oder Analysefehler beenden das Python-Programm mit einer Ausnahme.
+
 ## Aktiver Anwendungspfad
 
 ```mermaid

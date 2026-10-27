@@ -17,7 +17,7 @@ Die Berechnungen laufen in Python und pandas. Die Zusammenfassung verwendet eine
 
 ## Architektur und Implementierungsstand
 
-Die [ausführliche Architekturbeschreibung](docs/architecture.md) erklärt den Datenfluss, die Komponenten, Netzwerkgrenzen und den Betrieb. Ergänzend stehen [Architektur- und Sequenzdiagramme](docs/architecture_diagram.md) zur Verfügung.
+Die [ausführliche Architekturbeschreibung](docs/architecture.md) erklärt den Datenfluss, die Komponenten, Netzwerkgrenzen und den Betrieb. Ergänzend stehen [vollständige Ablauf-, Architektur- und Sequenzdiagramme](docs/architecture_diagram.md) zur Verfügung.
 
 ```mermaid
 flowchart LR
@@ -43,6 +43,37 @@ flowchart LR
 | GitHub Actions | Baut das Docker-Image und führt den CLI-Smoke-Test aus. Kein automatisches Azure-Deployment. |
 
 Die Anwendung läuft im Modus **Single Revision** mit genau einer Instanz. Dadurch bleiben die im Prozess gehaltene Streamlit-Sitzung und ihre Upload-Anfragen auf derselben Instanz.
+
+## Vollständiger Funktionsablauf
+
+```mermaid
+flowchart TD
+    Open[App öffnen] --> Selected{CSV oder PDF ausgewählt?}
+    Selected -->|Nein| Wait[Upload-Hinweis anzeigen und auf Datei warten]
+    Selected -->|Ja| Config{Blob Storage konfiguriert?}
+    Config -->|Ja| Store[Originaldatei mit Azure-Authentifizierung speichern]
+    Config -->|Nein| Type
+    Store -->|Erfolgreich| Type{CSV oder PDF?}
+    Store -->|Fehler| Error[Fehlermeldung anzeigen]
+    Type -->|CSV| CSV[CSV lesen]
+    Type -->|PDF| PDF[Tabellen mit pdfplumber extrahieren]
+    CSV --> Normalize[Spalten normalisieren und Zahlen parsen]
+    PDF --> Normalize
+    Normalize -->|Ungültige Datei| Error
+    Normalize -->|Erfolgreich| Total{Gesamtwert größer als null?}
+    Total -->|Nein| Error
+    Total -->|Ja| Calc[Gewichte, Anlageklassen und Top 5 berechnen]
+    Calc --> Risks[Konzentrationen anhand fester Regeln prüfen]
+    Risks --> Text[Textzusammenfassung aus den Ergebnissen erstellen]
+    Text --> Show[Importstatus, gegebenenfalls Blob-URI, Kennzahlen und Tabellen anzeigen]
+    Show --> Found{Konzentrationshinweise vorhanden?}
+    Found -->|Ja| Warnings[Warnungen anzeigen]
+    Found -->|Nein| OK[Keine erkannten Konzentrationen melden]
+    Warnings --> End[Zusammenfassung anzeigen]
+    OK --> End
+```
+
+Die gemeinsame Fehlerbehandlung umfasst auch nicht separat eingezeichnete Import-, Analyse- und Darstellungsfehler. Ein gespeicherter Blob bleibt bei einem späteren Fehler erhalten. Die Analyse läuft synchron und speichert Ergebnisse bisher nicht dauerhaft. Das [Detaildiagramm](docs/architecture_diagram.md#vollständiger-ablauf-der-webanwendung) beschreibt zusätzlich die Auswahl der Azure-Authentifizierung, die Importentscheidungen und den separaten CLI-Pfad.
 
 ## Lokal starten
 

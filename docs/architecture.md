@@ -35,7 +35,7 @@ flowchart TB
 
 Durchgezogene Verbindungen beschreiben den aktuellen Anwendungs- und Betriebspfad. Die gepunktete Verbindung kennzeichnet die Identitätskonfiguration. Der getrennte Bereich enthält vorhandene Azure-Ressourcen, die der Analysecode noch nicht verwendet. Insbesondere existiert aktuell kein Nachrichtenfluss über Service Bus und keine Speicherung von Analyseergebnissen in PostgreSQL.
 
-Die [ergänzenden Diagramme](architecture_diagram.md) zeigen Netzwerkstruktur und zeitlichen Ablauf eines Uploads.
+Die [ergänzenden Diagramme](architecture_diagram.md) enthalten den vollständigen Webablauf mit Entscheidungen und Fehlerfällen, den CLI-Ablauf sowie Netzwerkstruktur und Sequenzdiagramm.
 
 ## Fachliche Komponenten im Container
 
