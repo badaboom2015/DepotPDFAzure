@@ -1,30 +1,50 @@
-# Example Azure Depot PDF – Senior Azure Infrastructure Version
+# Example Azure Depot PDF
 
-Example Azure Depot PDF demonstrates a portfolio statement analyzer MVP and an enterprise-style Azure PaaS infrastructure design for a Senior Cloud Engineer interview.
+Eine Python-Anwendung zur Analyse von Depotaufstellungen als CSV oder PDF, betrieben auf Azure Container Apps. Das Projekt verbindet einen funktionierenden Streamlit-Prototyp mit einer durch Terraform verwalteten Azure-Infrastruktur.
 
-## What the MVP does
+**[Live-Anwendung öffnen](https://ca-example-azure-depot-pdf-dev.blackstone-9f92ba64.switzerlandnorth.azurecontainerapps.io/)** · **[Projektpräsentation als PDF](docs/Example-Azure-Depot-PDF-Praesentation.pdf)**
 
-- Imports CSV/PDF depot statements
-- Extracts positions
-- Calculates total value, weightings, top positions and concentration risks
-- Generates an educational investor summary
-- Does not let the LLM invent financial numbers
+## Funktionen
 
-## Senior infrastructure focus
+- Depotdateien im Browser hochladen oder per CLI einlesen.
+- CSV-Spalten und Tabellen aus textbasierten PDFs normalisieren.
+- Gesamtwert, Positionsgewichte und die fünf größten Positionen berechnen.
+- Konzentrationen anhand fester Schwellenwerte erkennen.
+- Eine regelbasierte Zusammenfassung aus den berechneten Ergebnissen erzeugen.
+- Hochgeladene Dateien bei konfiguriertem Azure-Zugriff in einem privaten Blob-Container speichern.
 
-- Azure Container Apps
-- Azure Container Registry
-- Azure Blob Storage with private endpoint
-- Azure Key Vault with private endpoint
-- Azure PostgreSQL Flexible Server with private networking
-- Azure Service Bus for async processing
-- Azure Log Analytics and Application Insights
-- Managed Identity and Azure RBAC
-- Terraform IaC
-- GitHub Actions CI
-- Argo CD / GitOps explanation for Kubernetes environments
+Die Berechnungen laufen in Python und pandas. Die Zusammenfassung verwendet eine Textvorlage, keinen externen KI-Dienst. Das Projekt dient der technischen Demonstration und ist keine Anlageberatung.
 
-## Local run
+## Architektur und Implementierungsstand
+
+```mermaid
+flowchart LR
+    User[Browser] --> App[Streamlit auf Azure Container Apps]
+    App --> Analysis[Import und Analyse mit pandas]
+    App --> Blob[Azure Blob Storage]
+    Identity[Managed Identity und RBAC] -. Zugriff .-> Blob
+    ACR[Azure Container Registry] --> App
+    Terraform[Terraform] -. Bereitstellung .-> App
+```
+
+| Bestandteil | Aufgabe und aktueller Stand |
+| --- | --- |
+| Streamlit / pandas / pdfplumber | Aktiver Import- und Analyseablauf. |
+| Azure Container Apps | Öffentlicher HTTPS-Endpunkt, Consumption-Profil, 0,5 vCPU und 1 GiB RAM. |
+| Azure Container Registry Basic | Speichert das in Azure gebaute Linux/AMD64-Image. |
+| Azure Blob Storage | Speichert Uploads. Private Container, deaktivierter anonymer Zugriff und Private Endpoint. |
+| Managed Identity / RBAC | Zugriff der App auf Registry und Blob Storage ohne gespeicherte Zugriffsschlüssel. |
+| PostgreSQL Flexible Server | Version 16, B1ms, 32 GiB Speicher, privates Netzwerk. Bereitgestellt, vom Analysecode noch nicht verwendet. |
+| Azure Service Bus Standard | Namespace und Import-Queue bereitgestellt. Producer und Worker sind noch nicht implementiert. |
+| Azure Key Vault | Mit Private Endpoint und deaktiviertem öffentlichem Netzwerk bereitgestellt. Die App liest derzeit keine Secrets daraus. |
+| Log Analytics / Application Insights | Infrastruktur für Beobachtbarkeit und Neustartalarm vorhanden. Eine Instrumentierung des Python-Codes für Application Insights fehlt noch. |
+| GitHub Actions | Baut das Docker-Image und führt den CLI-Smoke-Test aus. Kein automatisches Azure-Deployment. |
+
+Die Anwendung läuft im Modus **Single Revision** mit genau einer Instanz. Dadurch bleiben die im Prozess gehaltene Streamlit-Sitzung und ihre Upload-Anfragen auf derselben Instanz.
+
+## Lokal starten
+
+Voraussetzungen: Python 3.11 und `pip`.
 
 ```bash
 cd app
@@ -34,57 +54,112 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## Docker
+Die Oberfläche ist anschließend unter `http://localhost:8501` erreichbar. Ohne Azure-Umgebungsvariablen funktioniert die Analyse lokal ohne Blob-Speicherung.
+
+### CLI und Beispieldaten
+
+Vom Repository-Stamm aus:
 
 ```bash
 cd app
-docker build -t example-azure-depot-pdf:local .
-docker run -p 8501:8501 example-azure-depot-pdf:local
+python cli.py ../samples/sample_depot.csv
 ```
 
-## Terraform
+Die Beispieldatei enthält **8 Positionen** mit einem Gesamtwert von **16.700,00**. Die größte Position hat ein Gewicht von ungefähr **25,1 %**.
+
+### Docker
 
 ```bash
-cd infra/terraform
-terraform init
-terraform validate
-terraform plan
+docker build --platform linux/amd64 -t example-azure-depot-pdf:local ./app
+docker run --rm -p 8501:8501 example-azure-depot-pdf:local
 ```
 
-For a real deployment, first push your image to ACR and set:
+## Dateiformate und Grenzen
+
+Für CSV-Dateien sind `name`, `quantity` und `value` erforderlich. Der Importer erkennt auch bestimmte deutsche und englische Spaltenbezeichnungen, zum Beispiel `Wertpapier`, `Stückzahl` und `Marktwert`. `ticker` und `currency` sind optional.
+
+PDFs müssen erkennbare Tabellen mit passenden Spalten enthalten. Der Importer nutzt `pdfplumber`; eine OCR für eingescannte Dokumente ist nicht implementiert. Bank- und brokerspezifische Layouts können zusätzliche Importregeln erfordern.
+
+Weitere Grenzen des Prototyps:
+
+- Keine Währungsumrechnung. Werte müssen vor einer gemeinsamen Auswertung in derselben Währung vorliegen.
+- Anlageklassen sowie Technologie- und USA-Bezüge entstehen durch einfache Schlüsselwortregeln.
+- Keine Kursdatenabfrage, Handelsfunktion oder Anbindung an ein Depotkonto.
+- Keine Benutzeranmeldung oder Mandantentrennung in der Anwendung.
+- Kein asynchroner Analyse-Worker und keine Speicherung der Analyseergebnisse in PostgreSQL.
+
+## In Azure bereitstellen
+
+Voraussetzungen: eine aktive Azure-Subscription, Azure CLI, Terraform ab Version 1.6, Python 3 sowie Berechtigungen zum Erstellen von Ressourcen und RBAC-Rollenzuweisungen. Der Build erfolgt in Azure Container Registry; ein lokaler Docker-Daemon ist dafür nicht erforderlich.
+
+### 1. Anmelden und Dienste registrieren
 
 ```bash
-terraform apply -var="container_image=<acr-login-server>/example-azure-depot-pdf:latest"
+az login
+export AZURE_SUBSCRIPTION_ID="<subscription-id>"
+
+for provider in Microsoft.App Microsoft.ContainerRegistry \
+  Microsoft.DBforPostgreSQL Microsoft.Network Microsoft.Storage \
+  Microsoft.KeyVault Microsoft.ServiceBus Microsoft.OperationalInsights \
+  Microsoft.Insights Microsoft.ManagedIdentity; do
+  az provider register --namespace "$provider" \
+    --subscription "$AZURE_SUBSCRIPTION_ID" --wait
+done
 ```
 
-## Interview pitch
+### 2. Build und Deployment ausführen
 
-I started with a pragmatic MVP, then evolved the infrastructure into an enterprise-ready Azure PaaS design. The application runs on Azure Container Apps. Storage, Key Vault and PostgreSQL are isolated through private networking. Access is handled with Managed Identity and RBAC instead of secrets in code. Service Bus decouples import processing, and observability is handled through Log Analytics and Application Insights. Terraform provisions the platform reproducibly.
-
-## Project naming
-
-The display name is **Example Azure Depot PDF**; Docker images and Terraform resource names use `example-azure-depot-pdf`. The `app/portfolio` package retains its domain name because the portfolio analysis logic is unchanged.
-
-The JSON files in `infra/terraform` are reference snapshots, not live Azure inventory. Renaming local configuration does not rename deployed resources. Review a Terraform plan before applying: resource name changes can require replacement.
-
-## Deploying to the replacement subscription
-
-The active subscription is **Example Azure Depot PDF**. Use the `azure-depot-pdf` Terraform workspace for this subscription; the `default` workspace contains historical state for the old subscription and must not be applied to the replacement subscription. Local workspace state is stored under `infra/terraform/terraform.tfstate.d/` and must be backed up securely. It contains credentials and is excluded from Git.
+Vom Repository-Stamm aus:
 
 ```bash
-scripts/deploy-azure.sh <subscription-id>
+scripts/deploy-azure.sh "$AZURE_SUBSCRIPTION_ID"
 ```
 
-This script bootstraps ACR, builds the application remotely for Linux/AMD64, creates a plan using the real image, and applies it. It incurs Azure usage charges. Required resource providers must be registered first. The script saves the selected subscription and image in the Git-ignored `infra/terraform/deployment.auto.tfvars.json` for subsequent Terraform commands. The application uses single revision mode, 0.5 vCPU / 1 GiB, and exactly one replica so Streamlit sessions and file uploads remain on the same instance.
+Das Skript wählt den Terraform-Workspace `azure-depot-pdf`, prüft einen vorhandenen State auf die passende Subscription und erstellt zunächst die Container Registry. Danach baut und veröffentlicht es ein versioniertes Image, erzeugt den vollständigen Terraform-Plan und wendet ihn an.
 
-### Runtime verification
+**Das Skript wendet den Plan ohne zusätzliche interaktive Bestätigung an.** Vor der Ausführung müssen Subscription und Konfiguration geprüft sein. Standardregion ist `switzerlandnorth`. Die Ressourcen verursachen laufende Kosten, auch bei geringer Nutzung. Insbesondere Datenbank, Registry, Private Endpoints und Service Bus haben nutzungsunabhängige Kostenanteile.
 
-The public application URL is available from:
+### 3. Betrieb prüfen
 
 ```bash
 terraform -chdir=infra/terraform output -raw container_app_url
 ```
 
-Streamlit exposes its health endpoint at `/_stcore/health`. Upload `samples/sample_depot.csv` to verify the complete import and analysis flow. The expected total is **16,700.00**.
+Der Streamlit-Healthcheck ist unter `/_stcore/health` erreichbar. Für den Funktionstest `samples/sample_depot.csv` im Browser hochladen und kontrollieren, ob Tabellen, Kennzahlen und die Bestätigung der Blob-Speicherung erscheinen.
 
-The runtime explicitly selects the user-assigned managed identity through `AZURE_CLIENT_ID`. PyArrow is pinned to a NumPy-compatible version so Streamlit can render the position tables. Neither change alters portfolio calculations.
+## Terraform-State und Konfiguration
+
+- Das aktuelle Deployment verwendet den Workspace `azure-depot-pdf`.
+- Der lokale Workspace `default` enthält auf der bisherigen Entwicklungsmaschine den historischen State der alten Subscription. Er gehört nicht zum aktuellen Deployment.
+- Workspace-State liegt lokal unter `infra/terraform/terraform.tfstate.d/`. Er enthält unter anderem das generierte Datenbankpasswort und gehört in eine geschützte Sicherung, nicht in Git.
+- Das Deployment-Skript speichert Subscription und Image lokal in `infra/terraform/deployment.auto.tfvars.json`. Diese Datei ist ebenfalls von Git ausgeschlossen.
+- `app.json` und `revision.json` sind historische Referenz-Snapshots mit angepassten Namen. Sie beschreiben nicht verbindlich die aktuelle Azure-Umgebung.
+- Für eine Zusammenarbeit im Team sollte ein geschütztes Remote-Backend den lokalen State ersetzen. Ein frischer Clone enthält den produktiven State nicht und darf nicht unbesehen auf eine bestehende Umgebung angewendet werden.
+
+## Zugriff auf Azure-Dienste
+
+Die Anwendung wählt ihre zugewiesene Managed Identity über `AZURE_CLIENT_ID`. `AZURE_STORAGE_ACCOUNT_URL` und `AZURE_STORAGE_CONTAINER` bestimmen das Upload-Ziel. Für lokale Entwicklungsumgebungen unterstützt der Storage-Code alternativ `AZURE_STORAGE_CONNECTION_STRING`.
+
+Key Vault und PostgreSQL sind über private Netzwerkanbindungen konfiguriert. Blob Storage hat ebenfalls einen Private Endpoint; sein öffentlicher Endpunkt bleibt für die Verwaltung des Containers durch Terraform erreichbar. Anonyme Zugriffe sind deaktiviert. Die öffentliche Streamlit-Oberfläche hat derzeit keine vorgeschaltete Benutzeranmeldung.
+
+## Projektstruktur
+
+```text
+app/
+  app.py                 Streamlit-Oberfläche
+  cli.py                 Analyse über die Kommandozeile
+  portfolio/             Import, Berechnungen, Zusammenfassung und Storage
+  requirements.txt       Python-Abhängigkeiten
+  Dockerfile             Container-Image
+infra/terraform/          Azure-Ressourcen, Variablen und Outputs
+docs/                     Architektur und Projektpräsentation
+samples/sample_depot.csv  Beispieldaten für den Funktionstest
+scripts/deploy-azure.sh   Build und Bereitstellung in Azure
+.github/workflows/        Docker-Build und CLI-Smoke-Test
+```
+
+Der Paketname `portfolio` beschreibt weiterhin die fachliche Analyse. Der öffentliche Projektname lautet **Example Azure Depot PDF**, der technische Namensstamm `example-azure-depot-pdf`.
+
+## Nächste Entwicklungsschritte
+
+Benutzeranmeldung und Zugriffsschutz ergänzen, Importfehler mit weiteren Bankformaten testen und einen Remote-State einrichten. Danach können ein Service-Bus-Worker, die Speicherung von Analyseergebnissen und eine gezielte Application-Insights-Instrumentierung folgen.

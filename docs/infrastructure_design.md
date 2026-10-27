@@ -1,94 +1,42 @@
-# Senior Cloud Engineer Infrastructure Design
+# Example Azure Depot PDF - Infrastruktur und Betrieb
 
-## Architecture
+## Architektur
 
-```text
-Internet User
-    |
-Azure Container Apps external ingress
-    |
-Streamlit Example Azure Depot PDF container
-    |
-    +--> Blob Storage via Private Endpoint
-    +--> PostgreSQL Flexible Server via private delegated subnet
-    +--> Service Bus Queue for async import processing
-    +--> Application Insights / Log Analytics
+Die [Architekturdiagramme](architecture_diagram.md) unterscheiden den aktiven Anwendungspfad von den bereitgestellten Erweiterungsdiensten. Terraform verwaltet die Azure-Ressourcen. GitHub Actions prüft den Container-Build und die CLI, während das Deployment über `scripts/deploy-azure.sh` erfolgt.
 
-Security:
-- User Assigned Managed Identity
-- Azure RBAC
-- Key Vault with RBAC
-- Private Endpoints
-- Key Vault public network disabled
-- Blob Storage has a private endpoint; its public endpoint remains enabled for Terraform data-plane management, with private containers and authenticated access
+## Container-Betrieb
 
-Platform:
-- Azure Container Registry
-- Terraform
-- Single revision mode
-- Monitor alert for restarts
-```
+Die Streamlit-Anwendung läuft in einem Consumption-Workload-Profil von Azure Container Apps. Das zugehörige Subnetz ist an `Microsoft.App/environments` delegiert. Die App verwendet Single Revision und genau eine Instanz mit 0,5 vCPU und 1 GiB RAM. Diese Begrenzung hält Streamlit-Sitzungen und Upload-Anfragen auf derselben Instanz.
 
-## level
+Das Image liegt in Azure Container Registry Basic. Der Build erfolgt remote für Linux/AMD64. Der öffentliche HTTPS-Endpunkt bleibt bei einem Versionswechsel stabil. Streamlit stellt unter `/_stcore/health` einen Healthcheck bereit.
 
-### Network isolation
+## Netzwerk und Identität
 
-The infrastructure has a dedicated VNet with separate subnets for:
+Das virtuelle Netzwerk enthält separate Subnetze für Container Apps, Private Endpoints und PostgreSQL. Private DNS-Zonen mit VNet-Links unterstützen die Namensauflösung der privaten Dienste.
 
-- Container Apps
-- Private Endpoints
-- PostgreSQL
+Eine zugewiesene Managed Identity erhält `AcrPull`, `Storage Blob Data Contributor` und `Key Vault Secrets User`. Die Anwendung wählt diese Identität mit `AZURE_CLIENT_ID`. Registry- und Blob-Zugriff nutzen dadurch keine im Code hinterlegten Zugriffsschlüssel. Die Key-Vault-Rolle bereitet eine spätere Secret-Nutzung vor.
 
-### Private endpoints
+| Dienst | Netzwerkzugriff | Nutzung durch die Anwendung |
+| --- | --- | --- |
+| Blob Storage | Private Endpoint vorhanden. Öffentlicher Endpunkt für Terraform-Verwaltung aktiv, anonymer Zugriff deaktiviert. | Uploads speichern. |
+| PostgreSQL Flexible Server | Privates, delegiertes Subnetz und Private DNS. Öffentlicher Zugriff deaktiviert. | Noch keine Datenbankintegration. |
+| Key Vault | Private Endpoint, RBAC und deaktivierter öffentlicher Netzwerkzugriff. | Noch keine Secret-Abfrage im Anwendungscode. |
+| Service Bus Standard | Namespace und Queue bereitgestellt. Kein Private Endpoint konfiguriert. | Noch kein Producer oder Worker. |
 
-Key Vault is not publicly reachable. Blob Storage has a private endpoint for application access; its public endpoint remains enabled so Terraform can manage the uploads container from outside the VNet. Anonymous access is disabled.
+Die öffentliche Weboberfläche hat noch keine Benutzeranmeldung. Vor dem Einsatz mit vertraulichen Depotdateien sind ein passendes Authentifizierungs- und Berechtigungskonzept sowie Regeln für Aufbewahrung und Löschung erforderlich.
 
-### Managed Identity
+## Daten und Erweiterungen
 
-The app receives permissions via User Assigned Managed Identity instead of hardcoded credentials.
+Der Import und die Analyse laufen synchron in der Streamlit-Anwendung. PostgreSQL 16 mit B1ms und 32 GiB Speicher sowie die Service-Bus-Queue sind für spätere Erweiterungen vorhanden. Ein möglicher nächster Ausbauschritt ist ein Worker, der Nachrichten verarbeitet und Analyseergebnisse in PostgreSQL speichert. Dieser Ablauf ist noch nicht implementiert.
 
-### RBAC
+## Beobachtbarkeit
 
-The app has specific roles:
+Die Container-Apps-Umgebung verwendet Log Analytics für Container-Logs. Ein Azure-Monitor-Metrikalarm verfolgt unerwartete Neustarts. Application Insights ist ebenfalls bereitgestellt, und seine Connection String steht der App zur Verfügung. Eine SDK-Instrumentierung des Python-Codes fehlt noch. Der Action Group sind keine konkreten Benachrichtigungsempfänger zugeordnet.
 
-- AcrPull
-- Storage Blob Data Contributor
-- Key Vault Secrets User
+## Deployment und State
 
-### PostgreSQL Flexible Server
+Das Deployment-Skript erstellt zuerst die Registry, baut ein versioniertes Image und wendet anschließend den vollständigen Terraform-Plan an. Es bestätigt das Apply automatisch. Die aktuelle Umgebung verwendet den Workspace `azure-depot-pdf`.
 
-The database is deployed with private networking in a delegated subnet.
+State und lokale Variablen bleiben außerhalb von Git. Der State enthält das generierte Datenbankpasswort und benötigt eine geschützte Sicherung. Der historische Workspace `default` gehört zur alten Subscription. Für Teamarbeit sollte ein Remote-Backend mit Zugriffsschutz und State-Locking eingerichtet werden.
 
-### Service Bus
-
-The import flow can be decoupled from the UI and scaled independently.
-
-### Observability
-
-Log Analytics and Application Insights are provisioned. A metric alert tracks unexpected restarts.
-
-### Deployment strategy
-
-Container Apps uses single revision mode so a new healthy revision replaces the previous revision without keeping additional revisions running.
-
-## Terraform vs Argo CD
-
-Terraform provisions Azure infrastructure.
-
-Argo CD would be used if the workload runs on Kubernetes:
-
-```text
-GitHub Actions builds image
-    |
-Container Registry
-    |
-Helm/Kustomize manifests
-    |
-Argo CD sync
-    |
-Kubernetes platform
-```
-
-## Interview explanation
-
-I first built a working MVP, then evolved the platform design into an enterprise-ready Azure PaaS architecture. The app runs on Container Apps. Data services are protected by private networking. Access is based on Managed Identity and RBAC. Service Bus decouples import processing, and Log Analytics/Application Insights provide observability. Terraform makes the platform reproducible.
+Die JSON-Dateien im Terraform-Verzeichnis sind historische Referenzen mit angepassten Namen und ersetzen keine Abfrage der aktuellen Azure-Ressourcen.
