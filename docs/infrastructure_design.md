@@ -4,11 +4,11 @@
 
 Die [ausführliche Architekturbeschreibung](architecture.md) enthält die Komponentenübersicht, den Ablauf eines Imports und die Verantwortlichkeiten für Daten und Identitäten.
 
-Die [Architekturdiagramme](architecture_diagram.md) unterscheiden den aktiven Anwendungspfad von den bereitgestellten Erweiterungsdiensten. Terraform verwaltet die Azure-Ressourcen. GitHub Actions prüft den Container-Build und die CLI, während das Deployment über `scripts/deploy-azure.sh` erfolgt.
+Die [Architekturdiagramme](architecture_diagram.md) unterscheiden den aktiven Anwendungspfad von den bereitgestellten Erweiterungsdiensten. Terraform verwaltet die Azure-Ressourcen. GitHub Actions prüft den Container-Build, die CLI und Regressionstests, während das Deployment über `scripts/deploy-azure.sh` erfolgt.
 
 ## Container-Betrieb
 
-Die Streamlit-Anwendung läuft in einem Consumption-Workload-Profil von Azure Container Apps. Das zugehörige Subnetz ist an `Microsoft.App/environments` delegiert. Die App verwendet Single Revision und genau eine Instanz mit 0,5 vCPU und 1 GiB RAM. Diese Begrenzung hält Streamlit-Sitzungen und Upload-Anfragen auf derselben Instanz.
+Der Container startet mit einem eigenen Benutzer ohne Root-Rechte. Die Streamlit-Anwendung läuft in einem Consumption-Workload-Profil von Azure Container Apps. Das zugehörige Subnetz ist an `Microsoft.App/environments` delegiert. Die App verwendet Single Revision und genau eine Instanz mit 0,5 vCPU und 1 GiB RAM. Diese Begrenzung hält Streamlit-Sitzungen und Upload-Anfragen auf derselben Instanz.
 
 Das Image liegt in Azure Container Registry Basic. Der Build erfolgt remote für Linux/AMD64. Der öffentliche HTTPS-Endpunkt bleibt bei einem Versionswechsel stabil. Streamlit stellt unter `/_stcore/health` einen Healthcheck bereit.
 

@@ -24,8 +24,8 @@ flowchart TD
     Auth -->|Ja| Conn[Blob-Client mit Connection String erstellen]
     Auth -->|Nein| Identity[DefaultAzureCredential mit zugewiesener Managed Identity]
     Conn --> Save
-    Identity --> Save[Blob-Name aus UTC-Zeit und Dateiname bilden]
-    Save --> Container[Container-Erstellung versuchen, Fehler dabei abfangen]
+    Identity --> Save[Blob-Name aus UTC-Zeit, UUID und bereinigtem Dateiname bilden]
+    Save --> Container[Container-Erstellung versuchen, nur bereits vorhandenen Container abfangen]
     Container --> Upload[Originaldatei hochladen und Leseposition zurücksetzen]
     Upload -->|Erfolgreich: Blob-URI merken| Read
     Upload -->|Fehler| Error[Processing failed mit Fehlertext anzeigen]
@@ -39,7 +39,9 @@ flowchart TD
     CSV -->|Nicht lesbar| Error
     Normalize -->|Fehlende Spalten oder ungültige Zahlen| Error
     Normalize -->|Erfolgreich| Numbers[Menge und Wert parsen, optionale Spalten ergänzen und fehlende Werte entfernen]
-    Numbers --> Total[Positionswerte zum Gesamtwert summieren]
+    Numbers --> Currency{Angegebene Währungscodes einheitlich?}
+    Currency -->|Nein| Error
+    Currency -->|Ja| Total[Positionswerte zum Gesamtwert summieren]
     Total --> Positive{Gesamtwert größer als null?}
     Positive -->|Nein| Error
     Positive -->|Ja| Weights[Gewichte berechnen und Anlageklasse sowie Tech- und USA-Bezug zuordnen]
@@ -63,7 +65,7 @@ flowchart TD
 
 **Gemeinsame Fehlerbehandlung:** Der äußere `try`/`except`-Block umfasst Storage, Import, Analyse, Textgenerierung und Ergebnisdarstellung. Eine Ausnahme in einem dieser Schritte führt zur Fehlermeldung. Das Diagramm zeigt typische Fehlerstellen ausdrücklich; der Handler gilt auch für nicht eingezeichnete Laufzeitfehler. Schlägt etwa die Tabellenanzeige fehl, können vorher bereits Kennzahlen sichtbar sein.
 
-**Dateizustand:** Die Speicherung passiert vor der Validierung. Ein danach fehlgeschlagener Import oder eine fehlerhafte Analyse löscht den gespeicherten Blob nicht automatisch. Der Dateiname verwendet UTC-Zeit mit Sekundengenauigkeit, und der Upload erlaubt das Überschreiben eines gleichnamigen Blobs. Die Namen sind deshalb nicht unter allen Umständen eindeutig.
+**Dateizustand:** Die Speicherung passiert vor der Validierung. Ein danach fehlgeschlagener Import oder eine fehlerhafte Analyse löscht den gespeicherten Blob nicht automatisch. Der Blob-Name kombiniert UTC-Zeit, eine zufällige UUID und den bereinigten Dateinamen. Der Upload überschreibt vorhandene Blobs nicht. Nur der erwartete Fehler für einen bereits vorhandenen Container wird bei der Container-Erstellung abgefangen. Andere Azure-Fehler beenden den Ablauf.
 
 **Konzentrationsregeln:** Ab 25 % Gewicht erscheint eine Einzelpositions-Konzentration, zwischen 15 % und unter 25 % ein Hinweis auf eine große Position. Weitere Schwellen sind 70 % für die Top 5, 40 % für erkannte Technologiepositionen und 50 % für erkannte USA-Bezüge. Diese Zuordnungen beruhen auf Schlüsselwörtern, nicht auf externen Stammdaten.
 
@@ -80,7 +82,7 @@ flowchart LR
     Print --> Comment[Regelbasierte Zusammenfassung ausgeben]
 ```
 
-Die CLI verwendet Importer und Analyzer der Webanwendung. Sie hat keinen Blob-Upload und keine eigene grafische Fehlerbehandlung. Unbehandelte Import- oder Analysefehler beenden das Python-Programm mit einer Ausnahme.
+Die CLI verwendet Importer und Analyzer der Webanwendung. Sie hat keinen Blob-Upload. Erwartete Datei- und Validierungsfehler erscheinen als Meldung auf stderr und führen zum Exit-Code 1. Eine erfolgreiche Auswertung endet mit Exit-Code 0.
 
 ## Aktiver Anwendungspfad
 

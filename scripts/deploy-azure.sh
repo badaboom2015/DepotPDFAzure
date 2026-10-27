@@ -16,17 +16,19 @@ fi
 # Refuse to reuse an existing workspace for a different subscription.
 state_file="$(mktemp)"
 trap 'rm -f "$state_file"' EXIT
-if terraform -chdir="$terraform_dir" state pull > "$state_file"; then
+terraform -chdir="$terraform_dir" state pull > "$state_file"
+if [ -s "$state_file" ]; then
   python3 - "$state_file" "$subscription_id" <<'PYGUARD'
 import json, sys
 state = json.load(open(sys.argv[1]))
 expected = '/subscriptions/' + sys.argv[2].lower() + '/'
 for resource in state.get('resources', []):
-    if resource.get('type') == 'azurerm_resource_group':
-        for instance in resource.get('instances', []):
-            actual = instance.get('attributes', {}).get('id', '').lower()
-            if actual and not actual.startswith(expected):
-                raise SystemExit('Workspace belongs to another subscription; refusing to apply.')
+    if resource.get('mode', 'managed') != 'managed' or not resource.get('type', '').startswith('azurerm_'):
+        continue
+    for instance in resource.get('instances', []):
+        actual = instance.get('attributes', {}).get('id', '').lower()
+        if actual.startswith('/subscriptions/') and not actual.startswith(expected):
+            raise SystemExit('Workspace belongs to another subscription; refusing to apply.')
 PYGUARD
 fi
 

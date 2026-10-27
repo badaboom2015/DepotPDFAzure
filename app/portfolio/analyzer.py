@@ -1,13 +1,22 @@
 from .models import AnalysisResult
 import pandas as pd
+import math
 
 TECH = ["apple", "microsoft", "amazon", "alphabet", "google", "meta", "nvidia", "tesla", "nasdaq", "tech", "technology"]
 USA = ["usa", "us ", "s&p", "sp500", "nasdaq", "apple", "microsoft", "amazon", "alphabet", "google", "meta", "nvidia", "tesla"]
 
 def analyze_portfolio(df):
     positions = df.copy()
+    if positions.empty:
+        raise ValueError("No positions to analyze.")
+    if "currency" in positions:
+        currencies = set(positions["currency"].dropna().astype(str).str.strip().str.upper()) - {""}
+        if len(currencies) > 1:
+            raise ValueError("Mixed currencies cannot be added. Convert all positions to one currency before importing.")
+    if not all(math.isfinite(float(value)) for value in positions["value"]):
+        raise ValueError("Position values must be finite.")
     total = float(positions["value"].sum())
-    if total <= 0:
+    if not math.isfinite(total) or total <= 0:
         raise ValueError("Total value must be positive.")
 
     positions["weight_pct"] = positions["value"] / total * 100

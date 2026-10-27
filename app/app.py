@@ -27,10 +27,10 @@ if uploaded_file:
         col3.metric("Largest position", f"{result.max_weight:.1f}%")
 
         st.subheader("Structured positions")
-        st.dataframe(result.positions, use_container_width=True)
+        st.dataframe(result.positions, width="stretch")
 
         st.subheader("Top 5 positions")
-        st.dataframe(result.top5, use_container_width=True)
+        st.dataframe(result.top5, width="stretch")
 
         st.subheader("Concentration risks")
         if result.risks:

@@ -44,7 +44,7 @@ flowchart LR
 | Azure Service Bus Standard | Namespace und Import-Queue bereitgestellt. Producer und Worker sind noch nicht implementiert. |
 | Azure Key Vault | Mit Private Endpoint und deaktiviertem öffentlichem Netzwerk bereitgestellt. Die App liest derzeit keine Secrets daraus. |
 | Log Analytics / Application Insights | Infrastruktur für Beobachtbarkeit und Neustartalarm vorhanden. Eine Instrumentierung des Python-Codes für Application Insights fehlt noch. |
-| GitHub Actions | Baut das Docker-Image und führt den CLI-Smoke-Test aus. Kein automatisches Azure-Deployment. |
+| GitHub Actions | Baut das Docker-Image und führt den CLI-Smoke-Test sowie Regressionstests aus. Kein automatisches Azure-Deployment. |
 
 Die Anwendung läuft im Modus **Single Revision** mit genau einer Instanz. Dadurch bleiben die im Prozess gehaltene Streamlit-Sitzung und ihre Upload-Anfragen auf derselben Instanz.
 
@@ -119,7 +119,7 @@ PDFs müssen erkennbare Tabellen mit passenden Spalten enthalten. Der Importer n
 
 Weitere Grenzen des Prototyps:
 
-- Keine Währungsumrechnung. Werte müssen vor einer gemeinsamen Auswertung in derselben Währung vorliegen.
+- Keine Währungsumrechnung. Unterschiedliche angegebene Währungscodes führen zu einer Fehlermeldung. Werte ohne Währungsangabe müssen vom Benutzer derselben Währung zugeordnet werden.
 - Anlageklassen sowie Technologie- und USA-Bezüge entstehen durch einfache Schlüsselwortregeln.
 - Keine Kursdatenabfrage, Handelsfunktion oder Anbindung an ein Depotkonto.
 - Keine Benutzeranmeldung oder Mandantentrennung in der Anwendung.
@@ -192,7 +192,7 @@ infra/terraform/          Azure-Ressourcen, Variablen und Outputs
 docs/                     Architektur und Projektpräsentation
 samples/sample_depot.csv  Beispieldaten für den Funktionstest
 scripts/deploy-azure.sh   Build und Bereitstellung in Azure
-.github/workflows/        Docker-Build und CLI-Smoke-Test
+.github/workflows/        Docker-Build, CLI-Smoke-Test und Regressionstests
 ```
 
 Der Paketname `portfolio` beschreibt weiterhin die fachliche Analyse. Der öffentliche Projektname lautet **Example Azure Depot PDF**, der technische Namensstamm `example-azure-depot-pdf`.
@@ -200,3 +200,17 @@ Der Paketname `portfolio` beschreibt weiterhin die fachliche Analyse. Der öffen
 ## Nächste Entwicklungsschritte
 
 Benutzeranmeldung und Zugriffsschutz ergänzen, Importfehler mit weiteren Bankformaten testen und einen Remote-State einrichten. Danach können ein Service-Bus-Worker, die Speicherung von Analyseergebnissen und eine gezielte Application-Insights-Instrumentierung folgen.
+
+## Entwicklung und Regressionstests
+
+Nach Installation von `app/requirements.txt` lassen sich die Tests vom Repository-Stamm aus ausführen:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+Die Tests prüfen Zahlenformate, ungültige Daten, CSV- und PDF-Import, Währungsprüfung, Streamlit-Tabellen sowie Blob- und Deployment-Fehlerfälle. Storage- und Deployment-Tests verwenden Mocks beziehungsweise lokale CLI-Stubs und erstellen keine Azure-Ressourcen. Der Python-Stand der CI entspricht mit Version 3.11 dem Container.
+
+Der Importer weist ungültige Zahlen zurück, statt Buchstaben oder andere ungültige Zeichen stillschweigend zu entfernen. Leere Positionsnamen und unvollständige Positionen werden nicht als gültige Datensätze übernommen. Upload-Namen enthalten eine UUID und überschreiben keine vorhandenen Blobs. Der Container startet mit einem eigenen Benutzer ohne Root-Rechte.
+
+Die veröffentlichten PDF- und Bildunterlagen zeigen den zuvor verifizierten Azure-Stand. Änderungen am Anwendungscode und seinen Abhängigkeiten werden erst durch einen erneuten Build und ein Deployment in der laufenden Anwendung wirksam.

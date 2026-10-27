@@ -56,7 +56,7 @@ Die CLI verwendet denselben Importer und dieselben Berechnungen wie die Weboberf
 2. Der Browser überträgt eine CSV- oder PDF-Datei an die Anwendung.
 3. Bei konfiguriertem Azure-Zugriff speichert `storage.py` die Originaldatei im Container `uploads`. Im Azure-Deployment verwendet der SDK-Client die zugewiesene Managed Identity. Ohne konfigurierte Storage-Verbindung überspringt die lokale Anwendung diesen Schritt.
 4. Der Importer liest CSV-Spalten oder extrahiert Tabellen aus dem PDF. Er vereinheitlicht Namen wie `Wertpapier` und `Marktwert` und wandelt Zahlenwerte um. Erforderlich sind Name, Menge und Wert.
-5. Der Analyzer summiert Positionswerte, berechnet prozentuale Gewichte und sortiert die Positionen. Er ermittelt die Top 5 und wendet feste Regeln für Konzentrationshinweise an.
+5. Der Analyzer weist mehrere angegebene Währungscodes sowie nicht endliche Werte zurück. Anschließend summiert er Positionswerte, berechnet prozentuale Gewichte und sortiert die Positionen. Er ermittelt die Top 5 und wendet feste Regeln für Konzentrationshinweise an.
 6. Die Anwendung erstellt die regelbasierte Zusammenfassung und zeigt Positionen, Kennzahlen und Hinweise im Browser an.
 
 **Reihenfolge und Fehlerverhalten:** Die Speicherung erfolgt vor der fachlichen Validierung. Eine nicht auswertbare Datei kann deshalb bereits als Blob vorliegen. Wenn die konfigurierte Blob-Speicherung fehlschlägt, beendet die Webanwendung den Ablauf mit einer Fehlermeldung, bevor sie die Analyse ausführt. Eine automatische Rückabwicklung des Uploads ist nicht implementiert.
@@ -102,7 +102,7 @@ Managed Identity authentifiziert die Anwendung gegenüber Azure-Diensten. Eine A
 
 ## Bereitstellung und Versionswechsel
 
-GitHub Actions führt einen Docker-Build sowie den CLI-Smoke-Test aus. Ein Push löst kein automatisches Deployment in Azure aus.
+GitHub Actions führt unter Python 3.11 einen Docker-Build, den CLI-Smoke-Test und die Regressionstests aus. Ein Push löst kein automatisches Deployment in Azure aus.
 
 `scripts/deploy-azure.sh` arbeitet in folgenden Schritten:
 
@@ -122,7 +122,7 @@ Die App verwendet das Consumption-Profil mit 0,5 vCPU und 1 GiB RAM. Minimum und
 | CLI-Test mit `samples/sample_depot.csv` | Prüft Import, Berechnung und Zusammenfassung ohne Web- oder Storage-Pfad. Erwartet: 8 Positionen und Gesamtwert 16.700,00. |
 | CSV-Test im Browser | Prüft zusätzlich Sitzung, Upload, Blob-Speicherung und Tabellenanzeige. |
 | Container-Logs in Log Analytics | Unterstützen die Diagnose von Start-, Laufzeit- und Azure-SDK-Fehlern. |
-| Neustartalarm in Azure Monitor | Meldet einen Schwellenwert im Neustartmetriksatz. Die Action Group hat aktuell keine Benachrichtigungsempfänger. |
+| Neustartalarm in Azure Monitor | Wertet unerwartete Container-Neustarts anhand eines Schwellenwerts aus. Die Action Group hat aktuell keine Benachrichtigungsempfänger. |
 | Application Insights | Ressource und Connection String vorhanden. Python-SDK-Instrumentierung und fachliche Traces fehlen noch. |
 
 Bei Storage-Fehlern sind Identitätsauswahl, RBAC, DNS und Netzwerkzugriff getrennt zu prüfen. Bei Importfehlern sind Dateistruktur und Spaltennamen relevant. Ein erfolgreicher Infrastruktur-Plan ersetzt keinen Funktionstest der Anwendung.
@@ -132,3 +132,11 @@ Bei Storage-Fehlern sind Identitätsauswahl, RBAC, DNS und Netzwerkzugriff getre
 Ein späterer asynchroner Ablauf könnte nach der Blob-Speicherung eine Nachricht mit der Blob-Referenz in Service Bus schreiben. Ein Worker würde die Datei lesen, die vorhandene Analyse ausführen und Ergebnisse sowie Verarbeitungsstatus in PostgreSQL speichern. Die Weboberfläche könnte den Status abfragen und frühere Ergebnisse anzeigen.
 
 Dieser Ausbau benötigt zusätzlich ein Job-Datenmodell, Zugriffsprüfung auf Dateien und Ergebnisse, ein Konzept für wiederholte Nachrichten sowie eine Fehler- und Wiederholungsbehandlung. Die bereits bereitgestellten Azure-Dienste allein stellen diese Funktionen noch nicht bereit. Vor dem Umgang mit vertraulichen Depotdaten sind Benutzeranmeldung und ein Aufbewahrungs- und Löschkonzept die nächsten fachlichen Architekturentscheidungen.
+
+## Validierung und sichere Wiederholungen
+
+Der Importer unterstützt Dezimalpunkt, Dezimalkomma und gruppierte Tausenderangaben. Er weist ungültige Zahlen und doppelte Spaltennamen zurück. Angaben mit einem einzelnen Trennzeichen behandelt er weiterhin als Dezimalzahl; beispielsweise bedeutet `1,234` den Wert `1.234`. Ein unbekanntes Währungsfeld ermöglicht keine automatische Erkennung der tatsächlichen Währung.
+
+Jeder Upload erhält eine UUID im Blob-Namen. Azure-Clients und Credentials werden nach der Verwendung geschlossen, und der Dateizeiger wird auch bei einem Fehler zurückgesetzt. Der Dateiinhalt und die Ergebnisberechnung bleiben fachlich getrennt.
+
+Das Deployment-Skript akzeptiert einen leeren initialen State. Es stoppt, wenn Terraform den State nicht lesen kann oder wenn eine verwaltete Azure-Ressourcen-ID zu einer anderen Subscription gehört. Es überspringt solche Fehler nicht.
