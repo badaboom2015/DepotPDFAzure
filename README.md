@@ -199,6 +199,8 @@ Der Paketname `portfolio` beschreibt weiterhin die fachliche Analyse. Der öffen
 
 ## Nächste Entwicklungsschritte
 
+Die [kurze Zielbild-Präsentation](docs/Example-Azure-Depot-PDF-Zielbild.pdf) zeigt einen Vorschlag für den Ausbau nach dem MVP. Die geplanten Komponenten sind ausdrücklich als noch nicht implementiert gekennzeichnet.
+
 Benutzeranmeldung und Zugriffsschutz ergänzen, Importfehler mit weiteren Bankformaten testen und einen Remote-State einrichten. Danach können ein Service-Bus-Worker, die Speicherung von Analyseergebnissen und eine gezielte Application-Insights-Instrumentierung folgen.
 
 ## Entwicklung und Regressionstests
