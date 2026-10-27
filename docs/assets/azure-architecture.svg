@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1560" viewBox="0 0 2200 1560">
+<defs><marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M1 1 L10 6 L1 11" fill="none" stroke="#0078D4" stroke-width="2"/></marker><marker id="grey" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto"><path d="M1 1 L9 5 L1 9" fill="none" stroke="#65778B" stroke-width="2"/></marker></defs>
+<rect width="2200" height="1560" fill="#ffffff"/>
+<text x="65" y="72" font-family="Arial, sans-serif" font-size="48" font-weight="700" fill="#16324B">Example Azure Depot PDF</text>
+<text x="65" y="118" font-family="Arial, sans-serif" font-size="28" font-weight="400" fill="#536B80">Azure-Architektur: eingesetzte Dienste und ihr tatsächlicher Implementierungsstand</text>
+<rect x="830" y="165" width="550" height="105" rx="12" fill="#EFF6FC" stroke="#B2D2EC" stroke-width="2"/>
+<text x="854" y="207" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#005A9E">Browser</text>
+<text x="854" y="244" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Öffentliche Weboberfläche, noch ohne Anmeldung</text>
+<rect x="45" y="315" width="2110" height="1100" rx="18" fill="#FAFCFE" stroke="#93BAD9" stroke-width="2"/>
+<text x="80" y="365" font-family="Arial, sans-serif" font-size="29" font-weight="700" fill="#0078D4">MICROSOFT AZURE</text>
+<text x="510" y="365" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#536B80">Region Switzerland North</text>
+<text x="80" y="400" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#536B80">AKTIV IM ANWENDUNGS- ODER BETRIEBSPFAD</text>
+<rect x="90" y="440" width="480" height="145" rx="12" fill="#EFF6FC" stroke="#B2D2EC" stroke-width="2"/>
+<text x="114" y="482" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#005A9E">Azure Container Registry</text>
+<text x="114" y="519" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Basic Registry</text>
+<text x="114" y="549" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Versioniertes Linux/AMD64-Image</text>
+<rect x="780" y="440" width="560" height="185" rx="12" fill="#EFF6FC" stroke="#B2D2EC" stroke-width="2"/>
+<text x="804" y="482" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#005A9E">Azure Container Apps</text>
+<text x="804" y="519" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Hosting für Streamlit und Python</text>
+<text x="804" y="549" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Consumption: 0,5 vCPU und 1 GiB RAM</text>
+<text x="804" y="579" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Eine Instanz, Single Revision</text>
+<rect x="1570" y="440" width="500" height="185" rx="12" fill="#EFF6FC" stroke="#B2D2EC" stroke-width="2"/>
+<text x="1594" y="482" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#005A9E">Azure Blob Storage</text>
+<text x="1594" y="519" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Originaldateien im Container uploads</text>
+<text x="1594" y="549" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Privater Container und Private Endpoint</text>
+<text x="1594" y="579" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Öffentlicher Endpunkt bleibt aktiviert</text>
+<path d="M1105 270 V440" fill="none" stroke="#0078D4" stroke-width="3"  marker-end="url(#arrow)"/>
+<text x="1130" y="310" font-family="Arial, sans-serif" font-size="23" font-weight="400" fill="#0078D4">HTTPS / WebSocket</text>
+<path d="M570 510 H780" fill="none" stroke="#0078D4" stroke-width="3"  marker-end="url(#arrow)"/>
+<text x="592" y="485" font-family="Arial, sans-serif" font-size="21" font-weight="400" fill="#0078D4">Image laden</text>
+<path d="M1340 510 H1570" fill="none" stroke="#0078D4" stroke-width="3"  marker-end="url(#arrow)"/>
+<text x="1363" y="485" font-family="Arial, sans-serif" font-size="21" font-weight="400" fill="#0078D4">Datei speichern</text>
+<rect x="90" y="625" width="480" height="110" rx="12" fill="#EFF6FC" stroke="#B2D2EC" stroke-width="2"/>
+<text x="114" y="667" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#005A9E">Managed Identity + Azure RBAC</text>
+<text x="114" y="704" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">AcrPull und Blob-Schreibzugriff</text>
+<path d="M570 680 H705 V560 H780" fill="none" stroke="#65778B" stroke-width="3" stroke-dasharray="9 7" marker-end="url(#grey)"/>
+<rect x="90" y="780" width="480" height="145" rx="12" fill="#EFF6FC" stroke="#B2D2EC" stroke-width="2"/>
+<text x="114" y="822" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#005A9E">Azure Monitor</text>
+<text x="114" y="859" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Metrikalarm für Container-Neustarts</text>
+<text x="114" y="889" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Action Group ohne Benachrichtigungsziel</text>
+<path d="M845 625 V755 H330 V780" fill="none" stroke="#0078D4" stroke-width="3"  marker-end="url(#arrow)"/>
+<text x="600" y="735" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#0078D4">Neustartmetrik</text>
+<rect x="780" y="780" width="560" height="145" rx="12" fill="#EFF6FC" stroke="#B2D2EC" stroke-width="2"/>
+<text x="804" y="822" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#005A9E">Azure Log Analytics</text>
+<text x="804" y="859" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Container-Logs der Umgebung</text>
+<text x="804" y="889" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Zentrale Laufzeitdiagnose</text>
+<path d="M1110 625 V780" fill="none" stroke="#0078D4" stroke-width="3"  marker-end="url(#arrow)"/>
+<text x="1133" y="710" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#0078D4">Container-Logs</text>
+<rect x="1570" y="690" width="500" height="235" rx="12" fill="#FFFFFF" stroke="#D0DCE6" stroke-width="2"/>
+<text x="1594" y="732" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#536B80">IM APP-CONTAINER</text>
+<text x="1594" y="775" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#16324B">CSV/PDF-Import und Normalisierung</text>
+<text x="1594" y="808" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#16324B">pandas-Berechnung und Top 5</text>
+<text x="1594" y="841" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#16324B">Konzentrationsregeln und Textvorlage</text>
+<text x="1594" y="874" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#16324B">Ergebnisse bisher nur im Arbeitsspeicher</text>
+<text x="90" y="987" font-family="Arial, sans-serif" font-size="23" font-weight="700" fill="#65778B">BEREITGESTELLT - NOCH NICHT FACHLICH IN DEN ANALYSEABLAUF EINGEBUNDEN</text>
+<rect x="90" y="1020" width="480" height="180" rx="12" fill="#F3F4F6" stroke="#CDD3DA" stroke-width="2"/>
+<text x="114" y="1062" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#364A5F">Azure PostgreSQL</text>
+<text x="114" y="1099" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Flexible Server 16, B1ms, 32 GiB</text>
+<text x="114" y="1129" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Privates, delegiertes Subnetz</text>
+<text x="114" y="1159" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Noch keine Ergebnisablage</text>
+<rect x="610" y="1020" width="460" height="180" rx="12" fill="#F3F4F6" stroke="#CDD3DA" stroke-width="2"/>
+<text x="634" y="1062" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#364A5F">Azure Service Bus</text>
+<text x="634" y="1099" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Standard und Import-Queue</text>
+<text x="634" y="1129" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Noch kein Producer oder Worker</text>
+<text x="634" y="1159" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Kein Private Endpoint konfiguriert</text>
+<rect x="1110" y="1020" width="460" height="180" rx="12" fill="#F3F4F6" stroke="#CDD3DA" stroke-width="2"/>
+<text x="1134" y="1062" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#364A5F">Azure Key Vault</text>
+<text x="1134" y="1099" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Private Endpoint und RBAC</text>
+<text x="1134" y="1129" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Öffentlicher Zugriff deaktiviert</text>
+<text x="1134" y="1159" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Noch keine Secret-Abfrage</text>
+<rect x="1610" y="1020" width="460" height="180" rx="12" fill="#F3F4F6" stroke="#CDD3DA" stroke-width="2"/>
+<text x="1634" y="1062" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#364A5F">Azure Application Insights</text>
+<text x="1634" y="1099" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Ressource und Connection String</text>
+<text x="1634" y="1129" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Python-SDK-Instrumentierung fehlt</text>
+<text x="1634" y="1159" font-family="Arial, sans-serif" font-size="22" font-weight="400" fill="#445D73">Noch keine Anwendungstraces</text>
+<rect x="90" y="1245" width="1980" height="125" rx="12" fill="#E7F1F6" stroke="#AAC7D9" stroke-width="2"/>
+<text x="115" y="1286" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#005A9E">Azure Virtual Network + Private DNS</text>
+<text x="115" y="1327" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#16324B">Subnetze für Container Apps, Private Endpoints und PostgreSQL. DNS-Zonen und VNet-Links für private Dienste.</text>
+<text x="65" y="1463" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#16324B">Bereitstellung: Terraform und ACR Build. GitHub Actions prüft Docker-Build und CLI, ohne automatisches Azure-Deployment.</text>
+<text x="65" y="1510" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#536B80">Azure App Service ist nicht eingesetzt. Die Anwendung läuft auf Azure Container Apps. Stand: 27. Oktober 2026.</text>
+</svg>

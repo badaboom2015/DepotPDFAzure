@@ -2,6 +2,12 @@
 
 Die Diagramme beschreiben den aktuellen Code und die bereitgestellte Infrastruktur. Eine Ressource in Azure bedeutet nicht automatisch, dass die Anwendung sie bereits verwendet.
 
+## Azure-Dienste im Überblick
+
+![Azure-Dienste und Implementierungsstand](assets/azure-architecture.png)
+
+[Skalierbare SVG-Version öffnen](assets/azure-architecture.svg). Das Bild zeigt konkrete Azure-Dienste. Die folgenden Diagramme ergänzen den fachlichen Ablauf und die Netzwerkdetails.
+
 ## Vollständiger Ablauf der Webanwendung
 
 Dieses Diagramm folgt der Aufrufreihenfolge in `app/app.py`. Es zeigt die fachliche Verarbeitung innerhalb einer Streamlit-Ausführung. Bei einer neuen Dateiauswahl startet Streamlit die Verarbeitung erneut.

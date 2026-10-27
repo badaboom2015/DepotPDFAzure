@@ -17,6 +17,10 @@ Die Berechnungen laufen in Python und pandas. Die Zusammenfassung verwendet eine
 
 ## Architektur und Implementierungsstand
 
+![Azure-Architektur mit allen Diensten und ihrem Implementierungsstand](docs/assets/azure-architecture.png)
+
+Blau: aktiv im Anwendungs- oder Betriebspfad. Grau: bereitgestellte Dienste, deren fachliche Integration noch fehlt. [Architekturbild als skalierbare SVG öffnen](docs/assets/azure-architecture.svg).
+
 Die [ausführliche Architekturbeschreibung](docs/architecture.md) erklärt den Datenfluss, die Komponenten, Netzwerkgrenzen und den Betrieb. Ergänzend stehen [vollständige Ablauf-, Architektur- und Sequenzdiagramme](docs/architecture_diagram.md) zur Verfügung.
 
 ```mermaid
