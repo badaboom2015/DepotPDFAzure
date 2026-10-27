@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build -t portfolio-analyzer:${{ github.sha }} ./app
+        run: docker build -t example-azure-depot-pdf:${{ github.sha }} ./app
 
       - name: CLI smoke test
         run: |

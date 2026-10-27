@@ -7,7 +7,7 @@
               Azure Container Apps Ingress
                            |
                            v
-              Streamlit Portfolio Analyzer
+              Streamlit Example Azure Depot PDF
                  /        |        |       \
                 v         v        v        v
         Blob Storage   PostgreSQL  Service Bus  App Insights

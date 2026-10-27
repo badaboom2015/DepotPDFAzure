@@ -1,10 +1,10 @@
 {
-  "id": "/subscriptions/7b79ae9c-2a18-434f-9cbc-8cf3c8e57d75/resourceGroups/rg-css-portfolio-dev/providers/Microsoft.App/containerApps/ca-css-portfolio-dev/revisions/ca-css-portfolio-dev--0000007",
-  "name": "ca-css-portfolio-dev--0000007",
+  "id": "/subscriptions/7b79ae9c-2a18-434f-9cbc-8cf3c8e57d75/resourceGroups/rg-example-azure-depot-pdf-dev/providers/Microsoft.App/containerApps/ca-example-azure-depot-pdf-dev/revisions/ca-example-azure-depot-pdf-dev--0000007",
+  "name": "ca-example-azure-depot-pdf-dev--0000007",
   "properties": {
     "active": true,
     "createdTime": "2026-06-25T00:17:55+00:00",
-    "fqdn": "ca-css-portfolio-dev--0000007.yellowflower-23240e22.switzerlandnorth.azurecontainerapps.io",
+    "fqdn": "ca-example-azure-depot-pdf-dev--0000007.yellowflower-23240e22.switzerlandnorth.azurecontainerapps.io",
     "healthState": "Unhealthy",
     "provisioningState": "Provisioned",
     "replicas": 1,
@@ -16,7 +16,7 @@
           "env": [
             {
               "name": "AZURE_STORAGE_ACCOUNT_URL",
-              "value": "https://stcssportfoliodevnttm3.blob.core.windows.net"
+              "value": "https://stexampleazuredepotpdfd.blob.core.windows.net"
             },
             {
               "name": "AZURE_STORAGE_CONTAINER",
@@ -28,19 +28,19 @@
             },
             {
               "name": "SERVICE_BUS_NAMESPACE",
-              "value": "sb-css-portfolio-dev-nttm3u"
+              "value": "sb-example-azure-depot-pdf-dev-nttm3u"
             },
             {
               "name": "POSTGRES_HOST",
-              "value": "psql-css-portfolio-dev-nttm3u.postgres.database.azure.com"
+              "value": "psql-example-azure-depot-pdf-dev-nttm3u.postgres.database.azure.com"
             },
             {
               "name": "POSTGRES_DATABASE",
-              "value": "portfolio"
+              "value": "example-azure-depot-pdf"
             }
           ],
-          "image": "acrcssportfoliodevnttm3u.azurecr.io/portfolio-analyzer:v7",
-          "name": "portfolio-analyzer",
+          "image": "acrexampleazuredepotpdfdevnttm3u.azurecr.io/example-azure-depot-pdf:v7",
+          "name": "example-azure-depot-pdf",
           "probes": [],
           "resources": {
             "cpu": 0.5,
@@ -63,6 +63,6 @@
     },
     "trafficWeight": 100
   },
-  "resourceGroup": "rg-css-portfolio-dev",
+  "resourceGroup": "rg-example-azure-depot-pdf-dev",
   "type": "Microsoft.App/containerapps/revisions"
 }

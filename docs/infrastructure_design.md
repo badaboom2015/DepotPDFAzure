@@ -7,7 +7,7 @@ Internet User
     |
 Azure Container Apps external ingress
     |
-Streamlit Portfolio Analyzer container
+Streamlit Example Azure Depot PDF container
     |
     +--> Blob Storage via Private Endpoint
     +--> PostgreSQL Flexible Server via private delegated subnet
@@ -19,16 +19,17 @@ Security:
 - Azure RBAC
 - Key Vault with RBAC
 - Private Endpoints
-- Storage and Key Vault public network disabled
+- Key Vault public network disabled
+- Blob Storage has a private endpoint; its public endpoint remains enabled for Terraform data-plane management, with private containers and authenticated access
 
 Platform:
 - Azure Container Registry
 - Terraform
-- Multiple revision mode
+- Single revision mode
 - Monitor alert for restarts
 ```
 
-## Why this is senior-level
+## level
 
 ### Network isolation
 
@@ -40,7 +41,7 @@ The infrastructure has a dedicated VNet with separate subnets for:
 
 ### Private endpoints
 
-Blob Storage and Key Vault are not publicly reachable.
+Key Vault is not publicly reachable. Blob Storage has a private endpoint for application access; its public endpoint remains enabled so Terraform can manage the uploads container from outside the VNet. Anonymous access is disabled.
 
 ### Managed Identity
 
@@ -68,7 +69,7 @@ Log Analytics and Application Insights are provisioned. A metric alert tracks un
 
 ### Deployment strategy
 
-Container Apps uses multiple revisions, enabling rollback and traffic splitting.
+Container Apps uses single revision mode so a new healthy revision replaces the previous revision without keeping additional revisions running.
 
 ## Terraform vs Argo CD
 

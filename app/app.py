@@ -4,8 +4,8 @@ from portfolio.analyzer import analyze_portfolio
 from portfolio.commentary import generate_commentary
 from portfolio.storage import save_uploaded_file_if_configured
 
-st.set_page_config(page_title="CSS Portfolio Analyzer", layout="wide")
-st.title("CSS Portfolio Analyzer")
+st.set_page_config(page_title="Example Azure Depot PDF", layout="wide")
+st.title("Example Azure Depot PDF")
 st.caption("Azure PaaS MVP for depot statement analysis – no investment advice.")
 
 uploaded_file = st.file_uploader("Upload depot statement", type=["csv", "pdf"])

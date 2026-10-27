@@ -1,16 +1,16 @@
 {
-  "id": "/subscriptions/7b79ae9c-2a18-434f-9cbc-8cf3c8e57d75/resourceGroups/rg-css-portfolio-dev/providers/Microsoft.App/containerapps/ca-css-portfolio-dev",
+  "id": "/subscriptions/7b79ae9c-2a18-434f-9cbc-8cf3c8e57d75/resourceGroups/rg-example-azure-depot-pdf-dev/providers/Microsoft.App/containerapps/ca-example-azure-depot-pdf-dev",
   "identity": {
     "type": "UserAssigned",
     "userAssignedIdentities": {
-      "/subscriptions/7b79ae9c-2a18-434f-9cbc-8cf3c8e57d75/resourcegroups/rg-css-portfolio-dev/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-css-portfolio-dev-app": {
+      "/subscriptions/7b79ae9c-2a18-434f-9cbc-8cf3c8e57d75/resourcegroups/rg-example-azure-depot-pdf-dev/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-example-azure-depot-pdf-dev-app": {
         "clientId": "9083cf85-4ab0-4389-bbd2-e47154f0a538",
         "principalId": "5cadff3c-eb2e-4a19-b5e6-8d3b2c8e60be"
       }
     }
   },
   "location": "Switzerland North",
-  "name": "ca-css-portfolio-dev",
+  "name": "ca-example-azure-depot-pdf-dev",
   "properties": {
     "configuration": {
       "activeRevisionsMode": "Multiple",
@@ -24,7 +24,7 @@
         "customDomains": null,
         "exposedPort": 0,
         "external": true,
-        "fqdn": "ca-css-portfolio-dev.yellowflower-23240e22.switzerlandnorth.azurecontainerapps.io",
+        "fqdn": "ca-example-azure-depot-pdf-dev.yellowflower-23240e22.switzerlandnorth.azurecontainerapps.io",
         "ipSecurityRestrictions": [],
         "stickySessions": null,
         "targetPort": 8501,
@@ -39,9 +39,9 @@
       "maxInactiveRevisions": 100,
       "registries": [
         {
-          "identity": "/subscriptions/7b79ae9c-2a18-434f-9cbc-8cf3c8e57d75/resourceGroups/rg-css-portfolio-dev/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-css-portfolio-dev-app",
+          "identity": "/subscriptions/7b79ae9c-2a18-434f-9cbc-8cf3c8e57d75/resourceGroups/rg-example-azure-depot-pdf-dev/providers/Microsoft.ManagedIdentity/userAssignedIdentities/id-example-azure-depot-pdf-dev-app",
           "passwordSecretRef": "",
-          "server": "acrcssportfoliodevnttm3u.azurecr.io",
+          "server": "acrexampleazuredepotpdfdevnttm3u.azurecr.io",
           "username": ""
         }
       ],
@@ -51,12 +51,12 @@
     },
     "customDomainVerificationId": "9886FF1E33C3AF6164D7AD0AD37D4F520D5EEF97C681206CA1FB551A16B56A8A",
     "delegatedIdentities": [],
-    "environmentId": "/subscriptions/7b79ae9c-2a18-434f-9cbc-8cf3c8e57d75/resourceGroups/rg-css-portfolio-dev/providers/Microsoft.App/managedEnvironments/cae-css-portfolio-dev",
-    "eventStreamEndpoint": "https://switzerlandnorth.azurecontainerapps.dev/subscriptions/7b79ae9c-2a18-434f-9cbc-8cf3c8e57d75/resourceGroups/rg-css-portfolio-dev/containerApps/ca-css-portfolio-dev/eventstream",
-    "latestReadyRevisionName": "ca-css-portfolio-dev--jst6a1y",
-    "latestRevisionFqdn": "ca-css-portfolio-dev--0000007.yellowflower-23240e22.switzerlandnorth.azurecontainerapps.io",
-    "latestRevisionName": "ca-css-portfolio-dev--0000007",
-    "managedEnvironmentId": "/subscriptions/7b79ae9c-2a18-434f-9cbc-8cf3c8e57d75/resourceGroups/rg-css-portfolio-dev/providers/Microsoft.App/managedEnvironments/cae-css-portfolio-dev",
+    "environmentId": "/subscriptions/7b79ae9c-2a18-434f-9cbc-8cf3c8e57d75/resourceGroups/rg-example-azure-depot-pdf-dev/providers/Microsoft.App/managedEnvironments/cae-example-azure-depot-pdf-dev",
+    "eventStreamEndpoint": "https://switzerlandnorth.azurecontainerapps.dev/subscriptions/7b79ae9c-2a18-434f-9cbc-8cf3c8e57d75/resourceGroups/rg-example-azure-depot-pdf-dev/containerApps/ca-example-azure-depot-pdf-dev/eventstream",
+    "latestReadyRevisionName": "ca-example-azure-depot-pdf-dev--jst6a1y",
+    "latestRevisionFqdn": "ca-example-azure-depot-pdf-dev--0000007.yellowflower-23240e22.switzerlandnorth.azurecontainerapps.io",
+    "latestRevisionName": "ca-example-azure-depot-pdf-dev--0000007",
+    "managedEnvironmentId": "/subscriptions/7b79ae9c-2a18-434f-9cbc-8cf3c8e57d75/resourceGroups/rg-example-azure-depot-pdf-dev/providers/Microsoft.App/managedEnvironments/cae-example-azure-depot-pdf-dev",
     "outboundIpAddresses": [
       "20.250.128.127",
       "20.250.79.145",
@@ -228,7 +228,7 @@
           "env": [
             {
               "name": "AZURE_STORAGE_ACCOUNT_URL",
-              "value": "https://stcssportfoliodevnttm3.blob.core.windows.net"
+              "value": "https://stexampleazuredepotpdfd.blob.core.windows.net"
             },
             {
               "name": "AZURE_STORAGE_CONTAINER",
@@ -240,19 +240,19 @@
             },
             {
               "name": "SERVICE_BUS_NAMESPACE",
-              "value": "sb-css-portfolio-dev-nttm3u"
+              "value": "sb-example-azure-depot-pdf-dev-nttm3u"
             },
             {
               "name": "POSTGRES_HOST",
-              "value": "psql-css-portfolio-dev-nttm3u.postgres.database.azure.com"
+              "value": "psql-example-azure-depot-pdf-dev-nttm3u.postgres.database.azure.com"
             },
             {
               "name": "POSTGRES_DATABASE",
-              "value": "portfolio"
+              "value": "example-azure-depot-pdf"
             }
           ],
-          "image": "acrcssportfoliodevnttm3u.azurecr.io/portfolio-analyzer:v7",
-          "name": "portfolio-analyzer",
+          "image": "acrexampleazuredepotpdfdevnttm3u.azurecr.io/example-azure-depot-pdf:v7",
+          "name": "example-azure-depot-pdf",
           "probes": [],
           "resources": {
             "cpu": 0.5,
@@ -276,7 +276,7 @@
     },
     "workloadProfileName": "Consumption"
   },
-  "resourceGroup": "rg-css-portfolio-dev",
+  "resourceGroup": "rg-example-azure-depot-pdf-dev",
   "systemData": {
     "createdAt": "2026-06-24T01:58:13.4253898",
     "createdBy": "timsolo.inform@gmail.com",
@@ -289,7 +289,7 @@
     "environment": "dev",
     "managed_by": "terraform",
     "owner": "interview-demo",
-    "workload": "portfolio-analyzer"
+    "workload": "example-azure-depot-pdf"
   },
   "type": "Microsoft.App/containerApps"
 }

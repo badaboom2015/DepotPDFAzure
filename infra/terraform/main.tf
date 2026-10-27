@@ -61,6 +61,7 @@ resource "azurerm_subnet" "postgres" {
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
   address_prefixes     = ["10.40.20.0/24"]
+  service_endpoints    = ["Microsoft.Storage"]
 
   delegation {
     name = "postgres-delegation"
@@ -141,7 +142,7 @@ resource "azurerm_container_registry" "main" {
 }
 
 resource "azurerm_storage_account" "main" {
-  name                            = "st${substr(local.clean_project, 0, 20)}"
+  name                            = "st${substr(local.clean_project, 0, 14)}${random_string.suffix.result}"
   resource_group_name             = azurerm_resource_group.main.name
   location                        = azurerm_resource_group.main.location
   account_tier                    = "Standard"
@@ -191,7 +192,7 @@ resource "azurerm_private_endpoint" "storage_blob" {
 }
 
 resource "azurerm_key_vault" "main" {
-  name                          = "kv-${substr(local.clean_project, 0, 18)}"
+  name                          = "kv-${substr(local.clean_project, 0, 15)}${random_string.suffix.result}"
   location                      = azurerm_resource_group.main.location
   resource_group_name           = azurerm_resource_group.main.name
   tenant_id                     = data.azurerm_client_config.current.tenant_id
@@ -243,7 +244,7 @@ resource "azurerm_postgresql_flexible_server" "main" {
 }
 
 resource "azurerm_postgresql_flexible_server_database" "main" {
-  name      = "portfolio"
+  name      = "example-azure-depot-pdf"
   server_id = azurerm_postgresql_flexible_server.main.id
   charset   = "UTF8"
   collation = "en_US.utf8"
@@ -258,7 +259,7 @@ resource "azurerm_servicebus_namespace" "main" {
 }
 
 resource "azurerm_servicebus_queue" "imports" {
-  name         = "portfolio-imports"
+  name         = "example-azure-depot-pdf-imports"
   namespace_id = azurerm_servicebus_namespace.main.id
 
   lock_duration                        = "PT1M"
@@ -273,6 +274,11 @@ resource "azurerm_container_app_environment" "main" {
   log_analytics_workspace_id = azurerm_log_analytics_workspace.main.id
   infrastructure_subnet_id   = azurerm_subnet.container_apps.id
   tags                       = local.tags
+
+  workload_profile {
+    name                  = "Consumption"
+    workload_profile_type = "Consumption"
+  }
 
   lifecycle {
     ignore_changes = [
@@ -310,7 +316,8 @@ resource "azurerm_container_app" "main" {
   name                         = "ca-${local.name_prefix}"
   container_app_environment_id = azurerm_container_app_environment.main.id
   resource_group_name          = azurerm_resource_group.main.name
-  revision_mode                = "Multiple"
+  revision_mode                = "Single"
+  workload_profile_name        = "Consumption"
   tags                         = local.tags
 
   identity {
@@ -335,10 +342,10 @@ resource "azurerm_container_app" "main" {
 
   template {
     min_replicas = 1
-    max_replicas = 3
+    max_replicas = 1
 
     container {
-      name   = "portfolio-analyzer"
+      name   = "example-azure-depot-pdf"
       image  = var.container_image
       cpu    = 0.5
       memory = "1Gi"
@@ -372,6 +379,11 @@ resource "azurerm_container_app" "main" {
         name  = "POSTGRES_DATABASE"
         value = azurerm_postgresql_flexible_server_database.main.name
       }
+
+      env {
+        name  = "AZURE_CLIENT_ID"
+        value = azurerm_user_assigned_identity.app.client_id
+      }
     }
   }
 
@@ -386,7 +398,7 @@ resource "azurerm_container_app" "main" {
 resource "azurerm_monitor_action_group" "main" {
   name                = "ag-${local.name_prefix}"
   resource_group_name = azurerm_resource_group.main.name
-  short_name          = "cssdemo"
+  short_name          = "depotpdfdemo"
   tags                = local.tags
 }
 

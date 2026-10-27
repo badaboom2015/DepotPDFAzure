@@ -1,6 +1,6 @@
 variable "project" {
   type    = string
-  default = "css-portfolio"
+  default = "example-azure-depot-pdf"
 }
 
 variable "environment" {
@@ -14,8 +14,8 @@ variable "location" {
 }
 
 variable "container_image" {
-  type    = string
-  default = "acrcssportfoliodevnttm3u.azurecr.io/portfolio-analyzer:v3"
+  description = "Container image for Example Azure Depot PDF"
+  type        = string
 }
 
 variable "postgres_admin" {
@@ -31,7 +31,13 @@ variable "postgres_sku" {
 variable "tags" {
   type = map(string)
   default = {
-    workload = "portfolio-analyzer"
+    workload = "example-azure-depot-pdf"
     owner    = "interview-demo"
   }
+}
+
+variable "subscription_id" {
+  description = "Azure subscription used for deployment; null uses the Azure CLI context."
+  type        = string
+  default     = null
 }

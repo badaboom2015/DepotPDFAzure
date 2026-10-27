@@ -9,3 +9,7 @@ crash.*.log
 .venv/
 __pycache__/
 *.pyc
+
+# Local Terraform workspace state and saved plans
+**/terraform.tfstate.d/
+*.tfplan
