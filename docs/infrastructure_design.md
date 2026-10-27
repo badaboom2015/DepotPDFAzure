@@ -2,6 +2,8 @@
 
 ## Architektur
 
+Die [ausführliche Architekturbeschreibung](architecture.md) enthält die Komponentenübersicht, den Ablauf eines Imports und die Verantwortlichkeiten für Daten und Identitäten.
+
 Die [Architekturdiagramme](architecture_diagram.md) unterscheiden den aktiven Anwendungspfad von den bereitgestellten Erweiterungsdiensten. Terraform verwaltet die Azure-Ressourcen. GitHub Actions prüft den Container-Build und die CLI, während das Deployment über `scripts/deploy-azure.sh` erfolgt.
 
 ## Container-Betrieb

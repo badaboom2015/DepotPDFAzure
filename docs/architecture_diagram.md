@@ -55,3 +55,37 @@ flowchart TB
 **Netzwerkgrenzen:** PostgreSQL und Key Vault haben keinen öffentlichen Netzwerkzugriff. Blob Storage hat einen Private Endpoint und einen weiterhin aktivierten öffentlichen Endpunkt für die Verwaltung durch Terraform. Anonyme Zugriffe sind deaktiviert. Die Weboberfläche ist öffentlich und hat noch keine Benutzeranmeldung.
 
 **Skalierung:** Single Revision, eine Instanz mit 0,5 vCPU und 1 GiB RAM. Eine spätere Skalierung auf mehrere Instanzen benötigt ein Konzept für Streamlit-Sitzungen und Datei-Uploads.
+
+## Zeitlicher Ablauf eines Dateiimports
+
+```mermaid
+sequenceDiagram
+    actor User as Benutzer
+    participant Browser
+    participant App as Streamlit-App
+    participant Blob as Blob Storage
+    participant Import as Importer
+    participant Analyse as Analyzer
+    User->>Browser: CSV oder PDF auswählen
+    Browser->>App: Datei hochladen
+    opt Storage-Zugriff ist konfiguriert
+        App->>Blob: Originaldatei mit Authentifizierung speichern
+        Blob-->>App: Blob-URI
+    end
+    App->>Import: Datei lesen und normalisieren
+    alt Import erfolgreich
+        Import-->>App: Normalisierte Positionen
+        App->>Analyse: Kennzahlen und Konzentrationen berechnen
+        Analyse-->>App: AnalysisResult
+        Note over App: Regelbasierte Textzusammenfassung erstellen
+        App-->>Browser: Tabellen, Kennzahlen und Hinweise
+    else Datei nicht auswertbar
+        Import-->>App: Fehler
+        App-->>Browser: Fehlermeldung anzeigen
+        Note over App,Blob: Ein bereits gespeicherter Upload bleibt vorhanden
+    end
+```
+
+Schlägt die konfigurierte Blob-Speicherung fehl, erreicht die Ausführung den Importer nicht. Die App zeigt den Fehler an. Das Diagramm beschreibt den Webpfad; die CLI liest lokale Dateien ohne Blob-Speicherung.
+
+Die [ausführliche Architekturbeschreibung](architecture.md) erklärt Komponenten, Datenhaltung, Identitäten, Netzwerkadressen und Betrieb.

@@ -17,6 +17,8 @@ Die Berechnungen laufen in Python und pandas. Die Zusammenfassung verwendet eine
 
 ## Architektur und Implementierungsstand
 
+Die [ausführliche Architekturbeschreibung](docs/architecture.md) erklärt den Datenfluss, die Komponenten, Netzwerkgrenzen und den Betrieb. Ergänzend stehen [Architektur- und Sequenzdiagramme](docs/architecture_diagram.md) zur Verfügung.
+
 ```mermaid
 flowchart LR
     User[Browser] --> App[Streamlit auf Azure Container Apps]
